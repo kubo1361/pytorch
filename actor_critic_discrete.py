@@ -5,7 +5,8 @@ import torch.optim as optim
 import numpy as np
 import gym
 import matplotlib.pyplot as plt
-from gym import wrappers
+
+PATH="D:\PROJECTS\Bakalarka\model_data\model"
 
 class Net(nn.Module):
     def __init__(self, n_actions_, lr_=0.01):
@@ -21,7 +22,6 @@ class Net(nn.Module):
             nn.Linear(in_features=8 * 52 * 40, out_features=1024),
             nn.Linear(in_features=1024, out_features=1024),
             nn.Linear(in_features=1024, out_features=n_actions_),
-            nn.Softmax(dim=1),
         )
         self.optimizer = optim.Adam(self.parameters(), lr=lr_)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cuda:1')
@@ -41,7 +41,7 @@ class Agent(object):
         self.critic = Net(lr_=lr_c, n_actions_=1)
 
     def choose_action(self, observation):
-        distributions = T.distributions.Categorical(self.actor.forward(observation))
+        distributions = T.distributions.Categorical(F.softmax(self.actor.forward(observation), dim=0))
         action = distributions.sample()
         self.log_probs = distributions.log_prob(action)
         return action
@@ -74,11 +74,11 @@ def plot_learning_curve(x, scores, figure_file):
 
 
 if __name__ == '__main__':
-    agent = Agent(lr_a=0.00001, lr_c=0.0005, gamma=0.99)
+    agent = Agent(lr_a=0.01, lr_c=0.01, gamma=0.99)
 
     env = gym.make('MsPacman-v0')
     score_history = []
-    n_episodes = 1500
+    n_episodes = 1000
 
     for i in range(n_episodes):
         done = False
@@ -100,6 +100,8 @@ if __name__ == '__main__':
 
         print('episode', i, 'score %.3f' % score) 
         score_history.append(score)
+
+    T.save(agent, PATH)
 
     x = [i + 1 for i in range(n_episodes)]
     fileName_ = 'pacman.png'
