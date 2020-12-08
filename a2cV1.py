@@ -5,23 +5,25 @@ import torch.optim as optim
 import numpy as np
 import gym
 import matplotlib.pyplot as plt
+from gym.wrappers import MyWrapper
 
-PATH="D:\PROJECTS\Bakalarka\model_data\model"
+
+PATH="D:\PROJECTS\Bakalarka\model_data\modelV2"
 
 class Net(nn.Module):
     def __init__(self, n_actions_, lr_=0.01):
         super(Net, self).__init__()
         self.model = nn.Sequential( # Network
-            nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
-            nn.Conv2d(in_channels=16, out_channels=8, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=32, out_channels=16, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
             nn.Flatten(start_dim=1),
-            nn.Linear(in_features=8 * 52 * 40, out_features=1024),
-            nn.Linear(in_features=1024, out_features=1024),
-            nn.Linear(in_features=1024, out_features=n_actions_),
+            nn.Linear(in_features=16 * 52 * 40, out_features=256),
+            nn.Linear(in_features=256, out_features=256),
+            nn.Linear(in_features=256, out_features=n_actions_),
         )
         self.optimizer = optim.Adam(self.parameters(), lr=lr_)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cuda:1')
@@ -74,7 +76,7 @@ def plot_learning_curve(x, scores, figure_file):
 
 
 if __name__ == '__main__':
-    agent = Agent(lr_a=0.01, lr_c=0.01, gamma=0.99)
+    agent = Agent(lr_a=0.1, lr_c=0.2, gamma=0.99)
 
     env = gym.make('MsPacman-v0')
     score_history = []
