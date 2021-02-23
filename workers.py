@@ -1,9 +1,10 @@
-def reward_func(r):
+def reward_func(r):  # CLARIFY
     if r > 1:
         return 1
     elif r < -1:
         return -1
     return r
+
 
 class Worker:
     def __init__(self, id, env, agent, print_score=False, reward_function=reward_func):
@@ -12,25 +13,26 @@ class Worker:
 
         self.print_score = print_score
         self.episode = 1
-        self.state = None
+        self.observation = None
         self.score = 0
         self.agent = agent
         self.reward_function = reward_function
 
     def reset(self):
         if self.print_score and self.episode % 10 == 0:
-            print('worker: ', self.id, '\tepisode: ', self.episode, '\tscore: ', self.score)
+            print('worker: ', self.id, '\tepisode: ',
+                  self.episode, '\tscore: ', self.score)
         self.agent.average_score.append(self.score)
         self.agent.episodes += 1
-        self.state = self.env.reset()
+        self.observation = self.env.reset()
         self.episode += 1
         self.score = 0
-        return self.state
+        return self.observation
 
     def step(self, action):
-        self.state, r, t, _ = self.env.step(action)
-        self.score += r
+        self.observation, reward, terminate, _ = self.env.step(action)
+        self.score += reward
 
-        r = self.reward_function(r)
+        reward = self.reward_function(reward)
 
-        return self.state, r, t
+        return self.observation, reward, terminate

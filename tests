@@ -1,0 +1,8 @@
+workers = 20
+iterations = 1001
+game = Pong-v0
+template:
+name = network-steps-gamma-learning_rate-beta-value_loss
+
+#inspired by deepmind research papers
+test1 = V2-4-0.99-0.01-0.01
