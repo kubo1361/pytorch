@@ -37,5 +37,6 @@ def plot_results(data):
 
 
 if __name__ == '__main__':
-    data = load_file('logs/test1/test1_0_900_a2c.txt')
+    data = load_file('logs/test2/test2_0_3000_a2c.txt')
     plot_results(data)
+    # TODO COMPARE

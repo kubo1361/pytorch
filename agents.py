@@ -126,12 +126,12 @@ class AgentA2C:
 
                 advantages[step] = critic_values - iter_critic_values[step]
 
-            # podla debugeru to nema require grad
             #  CLARIFY vsetko co vytvorim nove sa automaticky pripoji na graf ? :D
             advantages_detached = advantages.detach()
 
             # average reward for statistics
-            average_reward = iter_rewards.mean().detach()  # CLARIFY treba to tiez detachnut ?
+            # CLARIFY treba to tiez detachnut ?
+            average_reward = iter_rewards.mean().detach()
 
             # CLARIFY od mareka
             """
@@ -152,7 +152,7 @@ class AgentA2C:
             actor_loss = - (iter_actor_log_probs * advantages_detached).mean()
 
             # CLARIFY entropia zvysuje loss, takze ju chceme tiez minimalizovat ?
-            entropy_loss = - (iter_entropies.mean() * self.beta_entropy)
+            entropy_loss = (iter_entropies.mean() * self.beta_entropy)
 
             # calculate final loss
             loss = actor_loss + critic_loss + entropy_loss
@@ -171,7 +171,7 @@ class AgentA2C:
             self.optimizer.step()
 
             # stats
-            if iteration % 10 == 0 and iteration > 0:
+            if iteration % 100 == 0 and iteration > 0:
 
                 # average for last 10 scores
                 avg = np.average(self.average_score[-100:])
@@ -195,7 +195,7 @@ class AgentA2C:
                         ',' + str(actor_loss.item()) + ',' + str(critic_loss.item()) + ',' + \
                         str(entropy_loss.item())
 
-                    if iteration % 100 == 0:
+                    if iteration % 1000 == 0:
                         self.average_score = self.average_score[-100:]
 
                         continuous_save_model_filename = (
@@ -212,27 +212,3 @@ class AgentA2C:
 
     def save_model(self, path):
         torch.save(self.model.state_dict(), path)
-
-
-# TODO pouzije sa pri vytvarani hracieho programu
-"""
-def choose_action(self, observation):
-        # add dimension (batch) to match (batch, layer, height, width), transfer to GPU
-        observation = observation.unsqueeze(0).to(self.device).float()
-
-        # we do not compute gradients when choosing actions, hence no_grad
-        with torch.no_grad():
-            outActor, _ = self.model(observation)
-
-        # transform output of forward pass, so probabilities will all add up to 1
-        probs = F.softmax(outActor, dim=-1)
-
-        # transfer to CPU after calculation
-        probs = probs.cpu()
-
-        # sort probabilities
-        action = probs.multinomial(num_samples=1)
-
-        # return highest probability
-        return action[0].item()
-"""

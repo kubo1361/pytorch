@@ -80,3 +80,10 @@ def make_env(env_name, steps):
     env = MoveImgChannel(env)
     env = BufferWrapper(env, steps)
     return ScaleFrame(env)
+
+def transform_env(env, steps):
+    env = SkipEnv(env)
+    env = PreProcessFrame(env)
+    env = MoveImgChannel(env)
+    env = BufferWrapper(env, steps)
+    return ScaleFrame(env)
