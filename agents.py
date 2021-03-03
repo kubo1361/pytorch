@@ -114,7 +114,6 @@ class AgentA2C:
             # forward pass - critic values after performing action
             with torch.no_grad():
                 _, critic_values = self.model(observations)
-                #  CLARIFY nemusi byt detach ked je to no grad ?
                 critic_values = critic_values.detach().cpu()
 
             # compute advantage - we compute steps backwards
@@ -126,37 +125,23 @@ class AgentA2C:
 
                 advantages[step] = critic_values - iter_critic_values[step]
 
-            #  CLARIFY vsetko co vytvorim nove sa automaticky pripoji na graf ? :D
+            # normalizacia, ma pomoct pri uceni skus s a bez
+            advantages = (advantages - torch.mean(advantages)) / \
+                (torch.std(advantages) + 1e-5)
+
             advantages_detached = advantages.detach()
 
             # average reward for statistics
-            # CLARIFY treba to tiez detachnut ?
             average_reward = iter_rewards.mean().detach()
 
-            # CLARIFY od mareka
-            """
-            # calculate losses
-            critic_loss = (advantages**2).mean()
-            actor_loss = - (iter_actor_log_probs * advantages_detached).mean()
-            entropy_loss = iter_entropies.mean()
-
-            # calculate final loss
-            loss = actor_loss + \
-                (self.critic_loss_coef * critic_loss) + \
-                (self.beta_entropy * entropy_loss)
-            """
-
-            ###########################
             # calculate losses
             critic_loss = (advantages**2).mean() * self.critic_loss_coef
             actor_loss = - (iter_actor_log_probs * advantages_detached).mean()
 
-            # CLARIFY entropia zvysuje loss, takze ju chceme tiez minimalizovat ?
             entropy_loss = (iter_entropies.mean() * self.beta_entropy)
 
             # calculate final loss
             loss = actor_loss + critic_loss + entropy_loss
-            #######################
 
             # clear gradients
             self.optimizer.zero_grad()

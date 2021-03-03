@@ -1,4 +1,4 @@
-def reward_func(r):  # CLARIFY
+def reward_func(r):
     if r > 1:
         return 1
     elif r < -1:
@@ -33,6 +33,6 @@ class Worker:
         self.observation, reward, terminate, _ = self.env.step(action)
         self.score += reward
 
-        reward = self.reward_function(reward)
+        # reward = self.reward_function(reward)
 
         return self.observation, reward, terminate

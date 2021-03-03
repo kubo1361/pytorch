@@ -6,7 +6,8 @@ import torch.nn.functional as F
 import time
 import tkinter as tk
 from PIL import Image, ImageTk
-from math import sqrt, pow
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 class Agent:
@@ -139,6 +140,8 @@ if __name__ == '__main__':
     env = gym.make('MsPacman-v0')
     observation = env.reset()
 
+    fig = Figure(figsize=(3, 3), dpi=100, edgecolor='black')
+
     window = tk.Tk()
     left_frame = tk.Frame(master=window, borderwidth=10)
     right_frame = tk.Frame(master=window, borderwidth=10)
@@ -149,14 +152,13 @@ if __name__ == '__main__':
     ai_suggestion_canvas = tk.Canvas(master=right_frame, bd=2,
                                      bg='black', width=suggestion_window_dim, height=suggestion_window_dim)
     ai_confidence_label = tk.Label(master=right_frame, text='AI confidence')
-    ai_confidence_canvas = tk.Canvas(master=right_frame, bd=2,
-                                     bg='black', width=confidence_window_width, height=confidence_window_height)
+    ai_confidence_canvas = FigureCanvasTkAgg(fig, master=right_frame)
 
     game_canvas.pack()
     checkbox.pack()
     ai_suggestion_canvas.pack()
     ai_confidence_label.pack()
-    ai_confidence_canvas.pack()
+    ai_confidence_canvas.get_tk_widget().pack()
 
     left_frame.grid(row=0, column=0)
     right_frame.grid(row=0, column=1)
@@ -164,12 +166,13 @@ if __name__ == '__main__':
     window.bind("<Key>", handle_keypress)
 
     # TODO game rendering
+    # TODO research if there is a way to render directly from gym to canvas
     img_raw = Image.fromarray(observation)
     img_raw = img_raw.resize(
         (round(img_raw.size[0] * 3), round(img_raw.size[1] * 3)))
     img = ImageTk.PhotoImage(image=img_raw)
     game_canvas.create_image(350, 350, anchor="center", image=img)
-    # window.after(game, 30, render, game, observation) #FIXME fuckin funkcie, need help
+    #window.after(game, 30, render, game, observation) #FIXME fuckin funkcie, need help
 
     # TODO ai suggestions
     ai_suggestion_canvas.create_polygon(
@@ -184,5 +187,10 @@ if __name__ == '__main__':
         suggestion_circle, outline='green', fill='yellow', width=3)
 
     # TODO confidence plot
+    confidence = [i for i in range(101)]  # TODO append confidence in list
+    action_plot = fig.add_subplot(111)  # TODO increment action
+    action_plot.plot(confidence)
+
+    ai_confidence_canvas.draw()
 
     window.mainloop()

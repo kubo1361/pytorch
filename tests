@@ -9,3 +9,14 @@ test1 = V2-4-4-0.99-0.01-0.01-0.5
 
 #suggested by marek
 test2 = V1-10-4-0.99-0.01-0.01-0.5
+
+#po konzultacii
+test3 = V3-10-4-0.99-0.0005-0.01-0.5 - bez normalizacie, bez reward func
+
+test4 = V3-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a reward func
+
+test5 = V3-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a bez reward func
+
+
+ skontroluj odmeny max a min a podla toho zisti ci treba reward function, normalizaciu nechaj(ale aj tak odtestuj)
+ pohladaj template pre bakalarku

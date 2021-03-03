@@ -9,11 +9,13 @@ class networkV1(nn.Module):
         super(networkV1, self).__init__()
         self.actions_count = actions_count
 
-        self.conv1s = nn.Conv2d(4, 16, 3, stride=1, padding=1)
-        self.conv2s = nn.Conv2d(16, 32, 3, stride=1, padding=1)
+        self.conv1s = nn.Conv2d(4, 16, 3, stride=1, padding=1)  # zmen 16 => 32
+        self.conv2s = nn.Conv2d(16, 32, 3, stride=1,
+                                padding=1)  # zmen 16 => 32
         self.conv3s = nn.Conv2d(32, 64, 3, stride=1, padding=1)
         self.conv4s = nn.Conv2d(64, 64, 3, stride=1, padding=1)
-
+        # 1 konvolucna a 2 fully connected - rovnako velke
+        # 512 pozri na marekovom githube
         self.fc1s = nn.Linear(5 * 5 * 64, 128)
         self.fc2s = nn.Linear(128, 256)
 
@@ -68,4 +70,45 @@ class networkV2(nn.Module):
 
         outActor = F.relu(self.fcp(x))
         outCritic = F.relu(self.fcv(x))
+        return outActor, outCritic
+
+
+# Upravene po konzultacii
+class networkV3(nn.Module):
+    def __init__(self, actions_count):
+        super(networkV3, self).__init__()
+        self.actions_count = actions_count
+
+        self.conv1s = nn.Conv2d(
+            4, 32, 3, stride=1, padding=1)  # zmena 16 => 32
+        self.conv2s = nn.Conv2d(32, 32, 3, stride=1,
+                                padding=1)  # zmena 16 => 32
+        self.conv3s = nn.Conv2d(32, 64, 3, stride=1, padding=1)
+        self.conv4s = nn.Conv2d(64, 64, 3, stride=1, padding=1)
+
+        self.fca1 = nn.Linear(5 * 5 * 64, 512)  # 512
+        self.fcc1 = nn.Linear(5 * 5 * 64, 512)  # 512
+
+        self.fca2 = nn.Linear(512, actions_count)
+        self.fcc2 = nn.Linear(512, 1)
+
+        self.apply(weights_init_xavier)
+
+    def forward(self, x):
+        x = F.relu(self.conv1s(x))
+        x = F.max_pool2d(x, kernel_size=2, stride=2, padding=0)
+        x = F.relu(self.conv2s(x))
+        x = F.max_pool2d(x, kernel_size=2, stride=2, padding=0)
+        x = F.relu(self.conv3s(x))
+        x = F.max_pool2d(x, kernel_size=2, stride=2, padding=0)
+        x = F.relu(self.conv4s(x))
+        x = F.max_pool2d(x, kernel_size=2, stride=2, padding=0)
+
+        x = x.flatten(start_dim=1)
+
+        x_a = F.relu(self.fca1(x))
+        x_c = F.relu(self.fcc1(x))
+
+        outActor = F.relu(self.fca2(x_a))
+        outCritic = F.relu(self.fcc2(x_c))
         return outActor, outCritic

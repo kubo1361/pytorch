@@ -1,5 +1,5 @@
 from agents import AgentA2C
-from networks import networkV1, networkV2
+from networks import networkV1, networkV2, networkV3
 from workers import Worker
 from gym_wrapper import make_env
 
@@ -7,7 +7,7 @@ from gym_wrapper import make_env
 def train():
     actions = 5
     workers_len = 20
-    iterations = 10001  # TODO zisti kolko treba
+    iterations = 4001
 
     # DeepMind DQN - 4
     stack = 4
@@ -15,7 +15,7 @@ def train():
     # Suggestion od mareka - 10
     steps = 10
 
-    agent = AgentA2C("test2", networkV1(actions), 0.99, 0.01, 0.01)
+    agent = AgentA2C("test5", networkV3(actions), 0.99, 0.0005, 0.01)
 
     workers = []
     for id in range(workers_len):
