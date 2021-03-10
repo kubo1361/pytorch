@@ -1,7 +1,8 @@
-from gym_wrapper import transform_env
+from gym_wrapper import transform_observation
 import torch
 import gym
-from networks import networkV1, networkV2
+import numpy as np
+from networks import networkV4
 import torch.nn.functional as F
 import time
 import tkinter as tk
@@ -39,33 +40,39 @@ class Agent:
         probs = probs.cpu()
 
         # sort probabilities
-        action = probs.multinomial(num_samples=1)
+        actions = probs.multinomial(num_samples=1)
+
+        #print('outActor: ', outActor, ' probs: ', probs, ' actions: ', actions, ' chosen_action: ', actions[0].item(), '\n')
 
         # return highest probability
-        return action[0].item()  # TODO extract confidence
+        return actions[0].item()  # TODO extract confidence
 
 
 def play():
-    path = 'models/test2/test2_0_a2c.pt'
+    path = 'models/final/final_3_a2c.pt'
     actions = 5
-    agent = Agent(networkV1(actions))
+    agent = Agent(networkV4(actions))
     agent.load_model(path)
 
     env = gym.make('MsPacman-v0')
-    env_ai = transform_env(env, 4)
-    observation = env.reset()
-    observation_ai = env_ai.reset()
+    env.reset()
     done = False
-
+    action_ai = 0
+    observations = np.zeros((4, 80, 80), dtype=np.float32)
     while not done:
-        env_ai = transform_env(env, 4)
-        env.render()
+        for i in range(0, 4):
+            env.render()
+            obs, _, done, _ = env.step(action_ai)
+            observations[i] = transform_observation(obs)
 
-        action_ai = agent.choose_action(torch.from_numpy(observation_ai))
-        _, _, done, _ = env.step(action_ai)
-
+        action_ai = agent.choose_action(torch.from_numpy(observations))
+        observations = np.zeros((4, 80, 80), dtype=np.float32)
         time.sleep(1 / 60)  # FPS
 
+
+if __name__ == '__main__':
+    play()
+"""
 # TODO put everything in a class
 # TODO add threads
 # TODO split for user control and AI suggestions
@@ -194,3 +201,4 @@ if __name__ == '__main__':
     ai_confidence_canvas.draw()
 
     window.mainloop()
+"""

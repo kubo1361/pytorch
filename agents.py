@@ -31,6 +31,7 @@ class AgentA2C:
 
         # create vars for tracking progress and identification
         self.average_score = []
+        self.average_steps = []
         self.episodes = 0
         self.name = name
         self.id = id
@@ -44,11 +45,12 @@ class AgentA2C:
         if not os.path.exists(self.logs_path):
             os.makedirs(self.logs_path)
 
-    def learn(self, workers, iterations, steps, write=True):
+    def learn(self, workers, iterations, steps, write=True, start_episode=0):
         # initial variables
         self.average_score = []
+        self.average_steps = []
         best_avg = -100
-        self.episodes = 0
+        self.episodes = start_episode
         len_workers = len(workers)
         observations = []
         text = ""
@@ -86,7 +88,6 @@ class AgentA2C:
                 step_entropies = (
                     step_log_probs * step_probs).sum(1, keepdim=True)
                 step_log_probs_policy = step_log_probs.gather(1, step_actions)
-
                 # update iteration steps
                 iter_critic_values[step] = step_critic
                 iter_entropies[step] = step_entropies
@@ -140,11 +141,11 @@ class AgentA2C:
 
             entropy_loss = (iter_entropies.mean() * self.beta_entropy)
 
-            # calculate final loss
-            loss = actor_loss + critic_loss + entropy_loss
-
             # clear gradients
             self.optimizer.zero_grad()
+
+            # calculate final loss
+            loss = actor_loss + critic_loss + entropy_loss
 
             # backward pass with our total loss https://www.datahubbs.com/two-headed-a2c-network-in-pytorch/
             loss.backward()
@@ -156,32 +157,35 @@ class AgentA2C:
             self.optimizer.step()
 
             # stats
-            if iteration % 100 == 0 and iteration > 0:
+            if iteration % 10 == 0 and iteration > 0:
 
                 # average for last 10 scores
-                avg = np.average(self.average_score[-100:])
-
+                avg_score = np.average(self.average_score[-100:])
+                avg_steps = np.average(self.average_steps[-100:])
                 # save model on new best average score
-                if avg > best_avg:
-                    best_avg = avg
+                if avg_score > best_avg:
+                    best_avg = avg_score
                     print('Saving model, best score is: ', best_avg)
                     model_filename = (
                         self.model_path + self.name + '_' + str(self.id) + '_a2c.pt')
                     self.save_model(model_filename)
 
+            if iteration % 100 == 0 and iteration > 0:
+
                 # display informations
                 print('iteration: ', iteration, '\tepisodes: ',
-                      self.episodes, '\taverage score: ', avg)
+                      self.episodes, '\taverage steps: ', avg_steps, '\taverage score: ', avg_score)
 
                 # write to file - log
                 if write:
                     text += '\n' + str(iteration) + ',' + str(self.episodes) + \
-                        ',' + str(avg) + ',' + str(average_reward.item()) + \
+                        ',' + str(avg_steps) + ',' + str(avg_score) + ',' + str(average_reward.item()) + \
                         ',' + str(actor_loss.item()) + ',' + str(critic_loss.item()) + ',' + \
                         str(entropy_loss.item())
 
                     if iteration % 1000 == 0:
                         self.average_score = self.average_score[-100:]
+                        self.average_steps = self.average_steps[-100:]
 
                         continuous_save_model_filename = (
                             self.model_path + self.name + '_' + str(self.id) + '_' + str(iteration) + '_a2c.pt')

@@ -81,9 +81,8 @@ def make_env(env_name, steps):
     env = BufferWrapper(env, steps)
     return ScaleFrame(env)
 
-def transform_env(env, steps):
-    env = SkipEnv(env)
-    env = PreProcessFrame(env)
-    env = MoveImgChannel(env)
-    env = BufferWrapper(env, steps)
-    return ScaleFrame(env)
+def transform_observation(obs):
+    new = PreProcessFrame.process(obs)
+    new = np.moveaxis(new, 2, 0)
+    new = np.array(new).astype(np.float32) / 255.0
+    return new
