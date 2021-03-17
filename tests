@@ -11,4 +11,7 @@ test5 = V4-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a reward func
 
 test6 = V4-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a bez reward func
 
-final = V4-20-4-0.99-0.0005-0.01-0.5 - s normalizaciou a reward func, 10 workerov, 512 velkost
+final = V4 steps:20 stack:4 gamma:0.99 lr:0.0005 beta:0.01 value_loss:0.5 - s normalizaciou a reward func, 10 workerov, 512 velkost
+
+
+final2 = V4-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a reward func, 10 workerov, 512 velkost

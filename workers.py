@@ -22,7 +22,7 @@ class Worker:
     def reset(self):
         if self.print_score and self.episode % 10 == 0:
             print('worker: ', self.id, '\tepisode: ',
-                  self.episode, '\tscore: ', self.score)
+                  self.episode, '\tsteps: ', self.steps, '\tscore: ', self.score)
         self.agent.average_score.append(self.score)
         self.agent.average_steps.append(self.steps)
         self.agent.episodes += 1

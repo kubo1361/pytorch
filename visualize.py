@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def load_file(filepath):
-    colnames = ['iteration', 'episode', 'score', 'reward',
+    colnames = ['iteration', 'episode', 'step', 'score', 'reward',
                 'actor_loss', 'critic_loss', 'entropy_loss']
     data = pd.read_csv(filepath, names=colnames, dtype=np.float)
     return data
@@ -42,6 +42,6 @@ def plot_results(data, data2):
 
 
 if __name__ == '__main__':
-    data = load_file('logs/final/final_0_10000_a2c.txt')
-    data2 = load_file('logs/test4/test4_0_5000_a2c.txt')
+    data = load_file('logs/final/final_4_267000_a2c.txt')
+    data2 = load_file('logs/final/final_4_267000_a2c.txt')
     plot_results(data, data2)
