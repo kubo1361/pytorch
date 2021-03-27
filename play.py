@@ -50,6 +50,7 @@ def play():
 
     env = gym.make('MsPacman-v0')
     env.reset()
+
     done = False
     action_ai = 0
     observations = np.zeros((4, 80, 80), dtype=np.float32)

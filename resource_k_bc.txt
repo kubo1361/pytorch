@@ -1,0 +1,11 @@
+p = random ()
+
+if (p < ε):
+	náhodná akcia
+else:
+	aktuálna najvýhodnejšia akcia
+
+
+	Q[stav, akcia] = (Q[stav, akcia] + miera_učenia) * 
+					(odmena + diskontný_faktor * max(Q[nový_stav, :]) — Q[stav, akcia])
+

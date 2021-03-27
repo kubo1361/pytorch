@@ -1,18 +1,15 @@
 from matplotlib import style
-import matplotlib.animation as animation
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from gym_wrapper import transform_observation
 import torch
 import gym
 import numpy as np
-from networks import networkV3, networkV4
+from networks import networkV4
 import torch.nn.functional as F
-import time
 import tkinter as tk
 from PIL import Image, ImageTk
 import matplotlib
-from tkinter import ttk
 
 
 class Agent:
@@ -118,16 +115,8 @@ class GameCanvas():
         self.canvas.pack()
 
         self.done = True
-        self.ai_control = True
-        self.action = 0
-        self.ai_action = 0
-        self.prob_of_action = 0
-
         self.stack = np.zeros((4, 80, 80), dtype=np.float32)
-
         self.env = gym.make('MsPacman-v0')
-        self.agent = Agent(networkV4(actions))
-        self.agent.load_model(path)
 
     def transform(self, observation):
         img_raw = Image.fromarray(observation)
@@ -142,29 +131,27 @@ class GameCanvas():
         image = self.transform(observation)
         return image
 
-    def step(self):
-        observation, _, self.done, _ = self.env.step(
-            (self.action, self.ai_action)[self.ai_control])
+    def step(self, action):
+        observation, _, self.done, _ = self.env.step(action)
 
         self.stack[0] = transform_observation(observation)
         self.stack = np.roll(self.stack, -1)
-
-        self.ai_action, self.prob_of_action = self.agent.choose_action(
-            torch.from_numpy(self.stack))
 
         image = self.transform(observation)
 
         return image
 
-    def game_render(self):
+    def game_render(self, action):
         if(self.done):
             img = self.reset()
         else:
-            img = self.step()
+            img = self.step(action)
 
         self.parent.img = img
         self.canvas.create_image(
             350, 350, anchor="center", image=img)
+
+        return self.stack
 
 
 class SuggestionCanvas():
@@ -271,6 +258,8 @@ class Game():
         self.game_canvas = GameCanvas(self.left_container)
         self.suggestion_canvas = SuggestionCanvas(self.right_container)
         self.confidence_canvas = ConfidencePlotCanvas(self.right_container)
+        self.agent = Agent(networkV4(actions))
+        self.agent.load_model(path)
 
         self.window.bind('<Right>', lambda event: self.right_pressed())
         self.window.bind('<Left>', lambda event: self.left_pressed())
@@ -278,39 +267,42 @@ class Game():
         self.window.bind('<Down>', lambda event: self.down_pressed())
         self.window.bind('<space>', lambda event: self.space_pressed())
 
+        self.ai_control = True
+        self.action = 0
+        self.ai_action = 0
         self.counter = 0
         self.render()
 
     def right_pressed(self):
-        self.game_canvas.action = 2
+        self.action = 2
 
     def left_pressed(self):
-        self.game_canvas.action = 3
+        self.action = 3
 
     def up_pressed(self):
-        self.game_canvas.action = 1
+        self.action = 1
 
     def down_pressed(self):
-        self.game_canvas.action = 4
+        self.action = 4
 
     def space_pressed(self):
-        self.game_canvas.ai_control = not self.game_canvas.ai_control
-        self.suggestion_canvas.switch_autopilot(self.game_canvas.ai_control)
-        print("AI control: ", self.game_canvas.ai_control)
-
-    def confidence_render(self):
-        print('todo')
+        self.ai_control = not self.ai_control
+        self.suggestion_canvas.switch_autopilot(self.ai_control)
+        print("AI control: ", self.ai_control)
 
     def render(self):
-        self.game_canvas.game_render()
+        stack = self.game_canvas.game_render(
+            (self.action, self.ai_action)[self.ai_control])
 
-        if(self.counter % 4 == 0):
+        if(self.counter % 2 == 0):
+            self.ai_action, prob_of_action = self.agent.choose_action(
+                torch.from_numpy(stack))
             self.suggestion_canvas.suggestion_render(
-                self.game_canvas.ai_action)
-            self.confidence_canvas.update(self.game_canvas.prob_of_action)
+                self.ai_action)
+            self.confidence_canvas.update(prob_of_action)
 
         self.counter += 1
-        self.window.after(30, lambda: self.render())
+        self.window.after(16, lambda: self.render())
 
 
 if __name__ == '__main__':

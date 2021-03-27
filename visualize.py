@@ -42,6 +42,6 @@ def plot_results(data, data2):
 
 
 if __name__ == '__main__':
-    data = load_file('logs/final/final_4_267000_a2c.txt')
-    data2 = load_file('logs/final/final_4_267000_a2c.txt')
+    data = load_file('logs/final2/final_0_139000_a2c.txt')
+    data2 = load_file('logs/final3/final_0_519000_a2c.txt')
     plot_results(data, data2)

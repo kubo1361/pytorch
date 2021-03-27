@@ -5,11 +5,6 @@ import torch.optim as optim
 import os
 from utils import write_to_file
 
-# TODO zisti co presne robi beta - 0.01 - https://arxiv.org/pdf/1602.01783.pdf deepmind a3c
-# TODO zisti co presne robi gamma
-# TODO nastavit learning rate
-# TODO nastavit value loss
-
 
 class AgentA2C:
     def __init__(self, name, model, gamma=0.99, lr=0.001, beta_entropy=0.01, critic_loss_coef=0.5, id=0):
