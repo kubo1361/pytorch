@@ -7,14 +7,14 @@ from utils import write_to_file
 
 
 class AgentA2C:
-    def __init__(self, name, model, gamma=0.99, lr=0.001, beta_entropy=0.01, critic_loss_coef=0.5, id=0):
+    def __init__(self, name, model, gamma=0.99, lr=[0.001], beta_entropy=0.01, critic_loss_coef=0.5, id=0):
         # init vars
         self.model = model
         self.actions_count = model.actions_count
         self.gamma = gamma
         self.beta_entropy = beta_entropy
         self.critic_loss_coef = critic_loss_coef
-
+        self.lr = lr
         # device - define and cast
         self.device = torch.device(
             "cuda:0" if torch.cuda.is_available() else "cpu")
@@ -22,7 +22,7 @@ class AgentA2C:
         self.model.to(self.device)
 
         # define optimizer
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr.pop(0))
 
         # create vars for tracking progress and identification
         self.average_score = []
@@ -40,7 +40,7 @@ class AgentA2C:
         if not os.path.exists(self.logs_path):
             os.makedirs(self.logs_path)
 
-    def learn(self, workers, iterations, steps, write=True, start_episode=0):
+    def learn(self, workers, iterations, steps, write=True, start_episode=0, lr_change_interval=100000):
         # initial variables
         self.average_score = []
         self.average_steps = []
@@ -190,6 +190,12 @@ class AgentA2C:
 
                         self.save_model(continuous_save_model_filename)
                         write_to_file(text, continuous_save_logs_filename)
+
+            if self.episodes % lr_change_interval == 0 and iteration > 0 and len(self.lr) > 0:
+                new_lr = self.lr.pop(0)
+                print('Changing lr to: ', new_lr)
+                for g in self.optimizer.param_groups:
+                    g['lr'] = new_lr
 
     def load_model(self, path):
         self.model.load_state_dict(torch.load(path))

@@ -1,10 +1,15 @@
-from gym_wrapper import transform_observation
+from gym_wrapper import transform_observation, make_env
 import torch
 import gym
 import numpy as np
-from networks import networkV4
+from networks import networkV5
 import torch.nn.functional as F
 import time
+
+from IPython.display import Image
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from PIL import ImageTk
 
 
 class Agent:
@@ -43,9 +48,70 @@ class Agent:
 
 
 def play():
-    path = 'models/final/final_4_a2c.pt'
+    path = 'models/finalfinal/final_2_a2c.pt'
     actions = 5
-    agent = Agent(networkV4(actions))
+    agent = Agent(networkV5(actions))
+    agent.load_model(path)
+
+    env = gym.make('MsPacman-v0')
+    init = env.reset()
+    init = transform_observation(init)
+    done = False
+    action_ai = 0
+    observations = np.zeros((4, 80, 80), dtype=np.float32)
+    switch = True
+    while True:
+        while not done:
+            for _ in range(4):
+                env.render()
+                obs, _, done, _ = env.step(action_ai)
+                switch = not switch
+            observations[:-1] = observations[1:]
+            observations[-1] = transform_observation(obs)
+            action_ai = agent.choose_action(torch.from_numpy(observations))
+            time.sleep(1 / 60)  # FPS
+        env.reset()
+        done = False
+
+
+def play2():
+    path = 'models/finalfinal/final_2_a2c.pt'
+    actions = 5
+    agent = Agent(networkV5(actions))
+    agent.load_model(path)
+
+    env = make_env('MsPacman-v0', 4)
+    env.reset()
+    done = False
+    action_ai = 0
+    score = 0
+    while not done:
+        obs, reward, done, _ = env.step(action_ai)
+
+        action_ai = agent.choose_action(torch.from_numpy(obs))
+        score += reward
+        print(score)
+
+
+def trans_obs():
+    env = gym.make('MsPacman-v0')
+    obs = env.reset()
+    transformed = transform_observation(obs)
+    transformed = transformed.reshape(80, 80, 1)
+
+    plt.imshow(transformed[0], interpolation='nearest')
+    plt.show()
+
+
+if __name__ == '__main__':
+    play()
+    # trans_obs()
+
+"""
+def play():
+    path = 'models/finalfinal/final_1_205000_a2c.pt'
+    actions = 5
+    agent = Agent(networkV5(actions))
     agent.load_model(path)
 
     env = gym.make('MsPacman-v0')
@@ -63,7 +129,4 @@ def play():
         action_ai = agent.choose_action(torch.from_numpy(observations))
         observations = np.zeros((4, 80, 80), dtype=np.float32)
         time.sleep(1 / 60)  # FPS
-
-
-if __name__ == '__main__':
-    play()
+        """

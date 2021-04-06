@@ -1,5 +1,7 @@
 import gym
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 class SkipEnv(gym.Wrapper):
     def __init__(self, env=None, skip=4):
@@ -80,6 +82,7 @@ def make_env(env_name, steps):
     env = MoveImgChannel(env)
     env = BufferWrapper(env, steps)
     return ScaleFrame(env)
+
 
 def transform_observation(obs):
     new = PreProcessFrame.process(obs)

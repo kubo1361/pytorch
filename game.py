@@ -5,7 +5,7 @@ from gym_wrapper import transform_observation
 import torch
 import gym
 import numpy as np
-from networks import networkV4
+from networks import networkV5
 import torch.nn.functional as F
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -103,7 +103,7 @@ FONT = ("Verdana", 12)
 f = Figure(figsize=(5, 5), dpi=60)
 a = f.add_subplot(111)
 
-path = 'models/final/final_4_a2c.pt'
+path = 'models/finalfinal/final_2_a2c.pt'
 actions = 5
 
 
@@ -115,10 +115,9 @@ class GameCanvas():
         self.canvas.pack()
 
         self.done = True
-        self.stack = np.zeros((4, 80, 80), dtype=np.float32)
         self.env = gym.make('MsPacman-v0')
 
-    def transform(self, observation):
+    def transform_image(self, observation):
         img_raw = Image.fromarray(observation)
         img_raw = img_raw.resize(
             (round(img_raw.size[0] * 3), round(img_raw.size[1] * 3)))
@@ -128,30 +127,32 @@ class GameCanvas():
     def reset(self):
         observation = self.env.reset()
         self.done = False
-        image = self.transform(observation)
-        return image
+
+        image = self.transform_image(observation)
+        agent_img = transform_observation(observation)
+
+        return image, agent_img
 
     def step(self, action):
         observation, _, self.done, _ = self.env.step(action)
 
-        self.stack[0] = transform_observation(observation)
-        self.stack = np.roll(self.stack, -1)
+        agent_img = transform_observation(observation)
+        image = self.transform_image(observation)
 
-        image = self.transform(observation)
-
-        return image
+        return image, agent_img
 
     def game_render(self, action):
+        done = self.done
         if(self.done):
-            img = self.reset()
+            img, agent_img = self.reset()
         else:
-            img = self.step(action)
+            img, agent_img = self.step(action)
 
         self.parent.img = img
         self.canvas.create_image(
             350, 350, anchor="center", image=img)
 
-        return self.stack
+        return agent_img, done
 
 
 class SuggestionCanvas():
@@ -243,6 +244,10 @@ class ConfidencePlotCanvas():
         a.plot(self.x, self.y)
         self.canvas.draw()
 
+    def reset(self):
+        self.x = np.zeros(10)
+        self.y = np.zeros(10)
+
 
 class Game():
     def __init__(self, *args, **kwargs):
@@ -258,7 +263,7 @@ class Game():
         self.game_canvas = GameCanvas(self.left_container)
         self.suggestion_canvas = SuggestionCanvas(self.right_container)
         self.confidence_canvas = ConfidencePlotCanvas(self.right_container)
-        self.agent = Agent(networkV4(actions))
+        self.agent = Agent(networkV5(actions))
         self.agent.load_model(path)
 
         self.window.bind('<Right>', lambda event: self.right_pressed())
@@ -267,8 +272,10 @@ class Game():
         self.window.bind('<Down>', lambda event: self.down_pressed())
         self.window.bind('<space>', lambda event: self.space_pressed())
 
+        self.stack = np.zeros((4, 80, 80), dtype=np.float32)
         self.ai_control = True
         self.action = 0
+        self.ai_prob = 0
         self.ai_action = 0
         self.counter = 0
         self.render()
@@ -291,18 +298,25 @@ class Game():
         print("AI control: ", self.ai_control)
 
     def render(self):
-        stack = self.game_canvas.game_render(
+        agent_img, reset = self.game_canvas.game_render(
             (self.action, self.ai_action)[self.ai_control])
+        self.suggestion_canvas.suggestion_render(
+            self.ai_action)
 
-        if(self.counter % 2 == 0):
-            self.ai_action, prob_of_action = self.agent.choose_action(
-                torch.from_numpy(stack))
-            self.suggestion_canvas.suggestion_render(
-                self.ai_action)
-            self.confidence_canvas.update(prob_of_action)
+        if not reset:
+            self.confidence_canvas.update(self.ai_prob)
+        else:
+            self.confidence_canvas.reset()
+
+        if(self.counter % 4 == 0):
+            self.stack[:-1] = self.stack[1:]
+            self.stack[-1] = agent_img
+
+            self.ai_action, self.ai_prob = self.agent.choose_action(
+                torch.from_numpy(self.stack))
 
         self.counter += 1
-        self.window.after(16, lambda: self.render())
+        self.window.after(1, lambda: self.render())
 
 
 if __name__ == '__main__':
