@@ -121,7 +121,7 @@ class AgentA2C:
 
                 advantages[step] = critic_values - iter_critic_values[step]
 
-            # normalizacia, ma pomoct pri uceni skus s a bez
+            # standard score normalization of advantage
             advantages = (advantages - torch.mean(advantages)) / \
                 (torch.std(advantages) + 1e-5)
 

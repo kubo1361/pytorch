@@ -2,7 +2,7 @@ from gym_wrapper import transform_observation, make_env
 import torch
 import gym
 import numpy as np
-from networks import networkV5
+from networks import networkV2
 import torch.nn.functional as F
 import time
 
@@ -50,7 +50,7 @@ class Agent:
 def play():
     path = 'models/finalfinal/final_2_a2c.pt'
     actions = 5
-    agent = Agent(networkV5(actions))
+    agent = Agent(networkV2(actions))
     agent.load_model(path)
 
     env = gym.make('MsPacman-v0')

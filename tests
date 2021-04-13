@@ -5,17 +5,17 @@ template:
 name = network-steps-stack-gamma-learning_rate-beta-value_loss
 
 #po konzultacii
-test4 = V4-10-4-0.99-0.0005-0.01-0.5 - bez normalizacie a reward func
+test1 = V1-10-4-0.99-0.0005-0.01-0.5 - bez normalizacie a reward func
 
-test5 = V4-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a reward func
+test2 (default) = V1-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a reward func
 
-test6 = V4-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a bez reward func
+test3 = V1-10-4-0.99-0.0005-0.01-0.5 - s normalizaciou a bez reward func
 
-final = V4 steps:20 stack:4 gamma:0.99 lr:0.0005 beta:0.01 value_loss:0.5 - s normalizaciou a reward func, 10 workerov, 512 velkost
+final1 (demonstracia) = V1 steps:20 stack:4 gamma:0.99 lr:0.0005 beta:0.01 value_loss:0.5 - s normalizaciou a reward func, 10 workerov, 512 velkost
 
 
-final2 = V4-10-4-0.99-0.0001-0.01-0.5 - s normalizaciou a reward func, 20 workerov, 512 velkost
+final2 (pokracovanie default) = V1-10-4-0.99-0.0001-0.01-0.5 - s normalizaciou a reward func, 20 workerov, 512 velkost
 
-finalfinal = V5-10-4-0.99-0.0001-0.01-0.5 - s normalizaciou a reward func, 20 workerov, 512 velkost + 2 64-konvolucie
+finalfinal = V2-10-4-0.99-0.0001-0.01-0.5 - s normalizaciou a reward func, 20 workerov, 512 velkost + 2 64-konvolucie
 
-final3TEST = V6-10-4-0.99-[0.001, 0.0005, 0.0001]-0.01-0.5 - s normalizaciou a reward func, 50 workerov, 640 velkost + 2 128-konvolucie
+final3TEST = V3-10-4-0.99-[0.001, 0.0005, 0.0001]-0.01-0.5 - s normalizaciou a reward func, 50 workerov, 640 velkost + 2 128-konvolucie

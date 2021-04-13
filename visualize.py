@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def load_file(filepath):
-    colnames = ['iteration', 'episode', 'step', 'score', 'reward',
+    colnames = ['iteration', 'episode', 'steps', 'score', 'reward',
                 'actor_loss', 'critic_loss', 'entropy_loss']
     data = pd.read_csv(filepath, names=colnames, dtype=np.float)
     return data
@@ -15,7 +15,7 @@ def plot_results(data, data2):
     ax0 = plt.subplot(3, 2, 1)
     ax0.plot(data.episode, data.score)
     ax0.plot(data2.episode, data2.score)
-    plt.title('Score')
+    plt.title('Average score per 100 episodes')
 
     ax1 = plt.subplot(3, 2, 2)
     ax1.plot(data.episode, data.reward)
@@ -42,6 +42,6 @@ def plot_results(data, data2):
 
 
 if __name__ == '__main__':
-    data = load_file('logs/finalfinal/final_2_198000_a2c.txt')
-    data2 = load_file('logs/finalfinal/final_2_198000_a2c.txt')
+    data = load_file('logs/finalfinal/final_0_519000_a2c.txt')
+    data2 = load_file('logs/final2/final_0_139000_a2c.txt')
     plot_results(data, data2)

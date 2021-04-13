@@ -5,7 +5,7 @@ from gym_wrapper import transform_observation
 import torch
 import gym
 import numpy as np
-from networks import networkV5
+from networks import networkV2
 import torch.nn.functional as F
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -263,7 +263,7 @@ class Game():
         self.game_canvas = GameCanvas(self.left_container)
         self.suggestion_canvas = SuggestionCanvas(self.right_container)
         self.confidence_canvas = ConfidencePlotCanvas(self.right_container)
-        self.agent = Agent(networkV5(actions))
+        self.agent = Agent(networkV2(actions))
         self.agent.load_model(path)
 
         self.window.bind('<Right>', lambda event: self.right_pressed())
