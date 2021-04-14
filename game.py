@@ -12,45 +12,7 @@ from PIL import Image, ImageTk
 import matplotlib
 
 
-class Agent:
-    def __init__(self, model):
-        # init vars
-        self.model = model
-        self.actions_count = model.actions_count
-
-        # device - define and cast
-        self.device = torch.device(
-            "cuda:0" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)
-
-    def load_model(self, path):
-        self.model.load_state_dict(torch.load(path))
-
-    def choose_action(self, observation):
-        # add dimension (batch) to match (batch, layer, height, width), transfer to GPU
-        observation = observation.unsqueeze(0).to(self.device).float()
-
-        # we do not compute gradients when choosing actions, hence no_grad
-        with torch.no_grad():
-            outActor, _ = self.model(observation)
-
-        # transform output of forward pass, so probabilities will all add up to 1
-        probs = F.softmax(outActor, dim=-1)
-
-        # transfer to CPU after calculation
-        probs = probs.cpu()
-
-        # extract highest probability
-        highest_prob = probs.max()
-
-        # sort probabilities
-        actions = probs.multinomial(num_samples=1)
-
-        # return highest probability
-        return actions[0].item(), highest_prob.item()
-
-
-# Window parameters
+# Global parameters
 game_width = 700
 game_height = 700
 
@@ -105,6 +67,44 @@ a = f.add_subplot(111)
 
 path = 'models/finalfinal/final_2_a2c.pt'
 actions = 5
+
+
+class Agent:
+    def __init__(self, model):
+        # init vars
+        self.model = model
+        self.actions_count = model.actions_count
+
+        # device - define and cast
+        self.device = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
+
+    def load_model(self, path):
+        self.model.load_state_dict(torch.load(path))
+
+    def choose_action(self, observation):
+        # add dimension (batch) to match (batch, layer, height, width), transfer to GPU
+        observation = observation.unsqueeze(0).to(self.device).float()
+
+        # we do not compute gradients when choosing actions, hence no_grad
+        with torch.no_grad():
+            outActor, _ = self.model(observation)
+
+        # transform output of forward pass, so probabilities will all add up to 1
+        probs = F.softmax(outActor, dim=-1)
+
+        # transfer to CPU after calculation
+        probs = probs.cpu()
+
+        # extract highest probability
+        highest_prob = probs.max()
+
+        # sort probabilities
+        actions = probs.multinomial(num_samples=1)
+
+        # return highest probability
+        return actions[0].item(), highest_prob.item()
 
 
 class GameCanvas():
@@ -179,8 +179,8 @@ class SuggestionCanvas():
                 type, outline='yellow', fill='green', width=3,
                 state=tk.HIDDEN))
 
-    def switch_autopilot(self, value):
-        self.autopilot = value
+    def switch_autopilot(self, switch):
+        self.autopilot = switch
         if(self.autopilot):
             self.autopilot_label.pack()
         else:
@@ -231,12 +231,12 @@ class ConfidencePlotCanvas():
         self.x = np.zeros(10)
         self.y = np.zeros(10)
 
-    def update(self, new_data):
+    def update(self, prob):
         next = self.x[-1] + 1
         self.x[0] = next
         self.x = np.roll(self.x, -1)
 
-        self.y[0] = new_data
+        self.y[0] = prob
         self.y = np.roll(self.y, -1)
 
         a.clear()
@@ -249,11 +249,12 @@ class ConfidencePlotCanvas():
         self.y = np.zeros(10)
 
 
-class Game():
-    def __init__(self, *args, **kwargs):
-        self.window = tk.Tk(*args, **kwargs)
+class App():
+    def __init__(self):
+        self.window = tk.Tk()
 
         tk.Tk.wm_title(self.window, "Pacman assisted")
+        self.window.resizable(False, False)
 
         self.left_container = tk.Frame(self.window)
         self.right_container = tk.Frame(self.window)
@@ -316,9 +317,9 @@ class Game():
                 torch.from_numpy(self.stack))
 
         self.counter += 1
-        self.window.after(1, lambda: self.render())
+        self.window.after(15, lambda: self.render())
 
 
 if __name__ == '__main__':
-    app = Game()
+    app = App()
     app.window.mainloop()
