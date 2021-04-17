@@ -77,7 +77,7 @@ def play():
 def play2():
     path = 'models/finalfinal/final_2_a2c.pt'
     actions = 5
-    agent = Agent(networkV5(actions))
+    agent = Agent(networkV2(actions))
     agent.load_model(path)
 
     env = make_env('MsPacman-v0', 4)
@@ -106,27 +106,3 @@ def trans_obs():
 if __name__ == '__main__':
     play()
     # trans_obs()
-
-"""
-def play():
-    path = 'models/finalfinal/final_1_205000_a2c.pt'
-    actions = 5
-    agent = Agent(networkV5(actions))
-    agent.load_model(path)
-
-    env = gym.make('MsPacman-v0')
-    env.reset()
-
-    done = False
-    action_ai = 0
-    observations = np.zeros((4, 80, 80), dtype=np.float32)
-    while not done:
-        for i in range(0, 4):
-            env.render()
-            obs, _, done, _ = env.step(action_ai)
-            observations[i] = transform_observation(obs)
-
-        action_ai = agent.choose_action(torch.from_numpy(observations))
-        observations = np.zeros((4, 80, 80), dtype=np.float32)
-        time.sleep(1 / 60)  # FPS
-        """

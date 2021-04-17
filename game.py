@@ -317,7 +317,7 @@ class App():
                 torch.from_numpy(self.stack))
 
         self.counter += 1
-        self.window.after(15, lambda: self.render())
+        self.window.after(1, lambda: self.render())
 
 
 if __name__ == '__main__':

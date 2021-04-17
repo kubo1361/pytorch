@@ -38,7 +38,7 @@ class networkV1(nn.Module):
 
         return outActor, outCritic
 
-# Basically network4 but expanded
+# Basically network1 but expanded
 
 
 class networkV2(nn.Module):
@@ -78,6 +78,8 @@ class networkV2(nn.Module):
         outCritic = self.fcc2(x_c)
 
         return outActor, outCritic
+
+# experimental - failed, too large
 
 
 class networkV3(nn.Module):
