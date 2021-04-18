@@ -65,7 +65,7 @@ FONT = ("Verdana", 12)
 f = Figure(figsize=(5, 5), dpi=60)
 a = f.add_subplot(111)
 
-path = 'models/finalfinal/final_2_a2c.pt'
+path = 'models/final/final_2_a2c.pt'
 actions = 5
 
 

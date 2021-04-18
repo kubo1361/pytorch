@@ -48,7 +48,7 @@ class Agent:
 
 
 def play():
-    path = 'models/finalfinal/final_2_a2c.pt'
+    path = 'models/final/final_2_a2c.pt'
     actions = 5
     agent = Agent(networkV2(actions))
     agent.load_model(path)
